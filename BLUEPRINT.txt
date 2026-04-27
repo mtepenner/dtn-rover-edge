@@ -1,0 +1,68 @@
+dtn-rover-edge/
+│
+├── .github/                             # CI/CD for embedded systems and backend
+│   └── workflows/
+│       ├── build-firmware.yml           # Compiles the C++ ESP32 sensor logic
+│       └── build-dtn-daemon.yml         # Compiles the Go edge daemon for Raspberry Pi
+│
+├── rover_firmware/                      # C/C++: The Low-Level Survival Reflexes
+│   ├── src/
+│   │   ├── main.cpp                     # FreeRTOS entry point for ESP32/Microcontroller
+│   │   ├── sensors/
+│   │   │   ├── ultrasonic.cpp           # Fast-polling collision detection
+│   │   │   └── imu.cpp                  # Tilt/roll detection (prevents tipping)
+│   │   ├── actuators/
+│   │   │   └── motors.cpp               # Drive train controls
+│   │   └── comms/
+│   │       └── serial_bridge.cpp        # Sends state and receives commands from the Go daemon
+│   └── platformio.ini                   # Build configuration for the microcontroller
+│
+├── edge_daemon/                         # Go: The DTN Bundle Agent & Edge Brain
+│   ├── cmd/
+│   │   └── agent/
+│   │       └── main.go                  # Runs on the companion computer (e.g., Raspberry Pi)
+│   ├── internal/
+│   │   ├── hardware_link/
+│   │   │   └── uart.go                  # Reads the serial stream from the ESP32
+│   │   ├── autonomy/
+│   │   │   └── navigator.go             # High-level pathfinding based on sensor maps
+│   │   └── dtn/                         # The Bundle Protocol Implementation (RFC 5050 / RFC 9171)
+│   │       ├── bundler.go               # Packages telemetry and photos into discrete "Bundles"
+│   │       ├── storage.go               # Persistent local storage (BadgerDB/LevelDB) for pending bundles
+│   │       └── transceiver.go           # Listens for the "Orbiter Link Active" signal to transmit
+│   ├── go.mod
+│   └── Dockerfile
+│
+├── deep_space_link/                     # Python: The Physics & Delay Simulator
+│   ├── app/
+│   │   ├── simulator.py                 # Introduces massive latency (e.g., 2 hours each way)
+│   │   ├── orbital_mechanics.py         # Calculates "Line of Sight" windows (when Earth can talk to Titan)
+│   │   └── network_impairment.py        # Randomly drops packets to simulate radiation or atmospheric noise
+│   ├── requirements.txt
+│   └── Dockerfile
+│
+├── earth_mission_control/               # Python/Go + React: Asynchronous Command Center
+│   ├── backend/
+│   │   ├── app/
+│   │   │   ├── dtn_receiver.py          # Earth's Bundle Protocol agent
+│   │   │   ├── database.py              # Stores the historically delayed telemetry
+│   │   │   └── command_queue.py         # Operator commands waiting to be bundled and sent to Titan
+│   │   ├── requirements.txt
+│   │   └── Dockerfile
+│   └── frontend/
+│       ├── src/
+│       │   ├── components/
+│       │   │   ├── AsynchronousMap.tsx  # Map showing where the rover *was* 2 hours ago
+│       │   │   ├── UplinkWindow.tsx     # Countdown timer to the next available transmission window
+│       │   │   └── CommandBuilder.tsx   # Visual tool to script high-level autonomy commands
+│       │   ├── App.tsx
+│       │   └── index.tsx
+│       ├── package.json
+│       └── Dockerfile
+│
+├── docker-compose.yml                   # Boots the Pi Daemon, Space Link Sim, and Earth UI locally
+├── Makefile
+└── README.md
+
+
+
