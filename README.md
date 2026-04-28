@@ -33,5 +33,7 @@ The system is divided into four primary components:
 1. Clone the repository: `git clone https://github.com/mtepenner/dtn-rover-edge.git`
 2. Launch the full environment: `docker-compose up`
 
+For firmware-only builds, if `pio` is not available on your shell `PATH`, run PlatformIO through Python instead: `python -m platformio run -d rover_firmware`
+
 ## ⚖️ License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
