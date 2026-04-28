@@ -1,0 +1,39 @@
+name: build-dtn-daemon
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  daemon-and-services:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Test edge daemon
+        working-directory: edge_daemon
+        run: go test ./...
+      - name: Build edge daemon
+        working-directory: edge_daemon
+        run: go build ./cmd/agent
+      - name: Install Python service dependencies
+        run: |
+          pip install -r deep_space_link/requirements.txt
+          pip install -r earth_mission_control/backend/requirements.txt
+      - name: Compile Python services
+        run: python -m compileall deep_space_link earth_mission_control/backend
+      - name: Install frontend dependencies
+        working-directory: earth_mission_control/frontend
+        run: npm install
+      - name: Build Earth frontend
+        working-directory: earth_mission_control/frontend
+        run: npm run build

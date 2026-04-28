@@ -1,0 +1,43 @@
+services:
+  edge_daemon:
+    build:
+      context: ./edge_daemon
+    environment:
+      DEEP_SPACE_LINK_URL: http://deep_space_link:8082
+      ROVER_NODE_ID: titan-rover-7
+    depends_on:
+      - deep_space_link
+    ports:
+      - "8081:8081"
+
+  deep_space_link:
+    build:
+      context: ./deep_space_link
+    environment:
+      SIM_DELAY_SECONDS: 15
+      SIM_PACKET_LOSS_RATE: 0.05
+      SIM_WINDOW_CYCLE_SECONDS: 90
+      SIM_WINDOW_ACTIVE_SECONDS: 28
+    ports:
+      - "8082:8082"
+
+  earth_backend:
+    build:
+      context: ./earth_mission_control/backend
+    environment:
+      DEEP_SPACE_LINK_URL: http://deep_space_link:8082
+      ROVER_NODE_ID: titan-rover-7
+    depends_on:
+      - deep_space_link
+    ports:
+      - "8083:8083"
+
+  earth_frontend:
+    build:
+      context: ./earth_mission_control/frontend
+      args:
+        VITE_EARTH_BACKEND_URL: http://localhost:8083
+    depends_on:
+      - earth_backend
+    ports:
+      - "3000:80"
